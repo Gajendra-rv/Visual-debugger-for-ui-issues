@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .home-hero {
+        padding: 80px 0 120px;
+        position: relative;
+        overflow: hidden;
+        background-color: #0b0c10;
+        background-image: url("{{ url_for('static', filename='images/home_hero_bg.png') }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    
+    .home-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(10, 10, 15, 0.4) 0%, rgba(10, 10, 15, 0.95) 100%);
+        z-index: 1;
+    }
+
+    .hero-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        background: rgba(0, 212, 255, 0.1);
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 100px;
+        color: var(--cyan);
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        animation: fadeInUp 0.5s ease;
+    }
+
+    .hero-title {
+        font-size: 64px;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.1;
+        margin-bottom: 24px;
+        color: var(--text-primary);
+        animation: fadeInUp 0.6s ease both;
+    }
+
+    .hero-title span {
+        background: var(--grad-cyan);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 18px;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto 48px;
+        line-height: 1.6;
+        animation: fadeInUp 0.7s ease both;
+    }
+
+    /* Cards Grid */
+    .home-grid {
+        max-width: 1200px;
+        margin: -60px auto 120px;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .nav-card {
+        background: var(--grad-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 40px 32px;
+        text-align: left;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        animation: fadeInUp 0.8s ease both;
+    }
+
+    .nav-card:nth-child(2) { animation-delay: 0.1s; }
+    .nav-card:nth-child(3) { animation-delay: 0.2s; }
+    .nav-card:nth-child(4) { animation-delay: 0.3s; }
+
+    .nav-card:hover {
+        transform: translateY(-12px);
+        border-color: var(--cyan);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--shadow-cyan);
+    }
+
+    .nav-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--cyan-glow-lg), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .nav-card:hover::before {
+        opacity: 1;
+    }
+
+    .card-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        color: var(--cyan);
+        transition: all 0.3s ease;
+    }
+
+    .nav-card:hover .card-icon {
+        background: var(--grad-cyan);
+        color: #000;
+        border-color: var(--cyan);
+        transform: scale(1.1);
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+        position: relative;
+    }
+
+    .card-text {
+        font-size: 14px;
+        color: var(--text-muted);
+        line-height: 1.5;
+        position: relative;
+    }
+
+    .card-arrow {
+        margin-top: auto;
+        padding-top: 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--cyan);
+        font-size: 13px;
+        font-weight: 600;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .nav-card:hover .card-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    @media (max-width: 768px) {
+        .hero-title { font-size: 40px; }
+        .home-hero { padding: 60px 0 100px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="home-hero">
+    <div class="hero-container">
+        <div class="hero-badge">
+            <span class="pulse-dot"></span>
+            AI-Engine v2.4 Online
+        </div>
+        <h1 class="hero-title">Automate UI Validation via <span>Deep Learning</span></h1>
+        <p class="hero-subtitle">
+            Harness the power of Convolutional Neural Networks to autonomously detect layout regressions, element overlaps, and contrast degradation with precisely generated heatmaps.
+        </p>
+        
+        {% if not session.user_id %}
+            <div class="hero-actions" style="margin-top: 32px; animation: fadeInUp 0.8s ease both;">
+                <a href="{{ url_for('auth.login') }}" class="btn-primary" style="padding: 14px 32px; font-size: 16px;">Get Started Now</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="home-grid">
+    <!-- Dashboard -->
+    <a href="{{ url_for('dashboard.index') }}" class="nav-card">
+        <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3 class="card-title">Live Dashboard</h3>
+        <p class="card-text">Monitor your platform's health and track visual bug trends in real-time with our neural engine stats.</p>
+        <div class="card-arrow">
+            Go to Dashboard <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </a>
+
+    <!-- Analyzer -->
+    <a href="{{ url_for('analyzer.index') }}" class="nav-card">
+        <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <h3 class="card-title">AI Analyzer</h3>
+        <p class="card-text">Upload screenshots or provide URLs for immediate AI-powered visual auditing and bug identification.</p>
+        <div class="card-arrow">
+            Launch Analyzer <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </a>
+
+    <!-- Sessions -->
+    <a href="{{ url_for('sessions.index') }}" class="nav-card">
+        <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3 class="card-title">Test Sessions</h3>
+        <p class="card-text">Access your full history of scans and sessions. Track how your UI has evolved over every iteration.</p>
+        <div class="card-arrow">
+            View Sessions <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </a>
+
+    <!-- Reports -->
+    <a href="{{ url_for('reports.index') }}" class="nav-card">
+        <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <h3 class="card-title">Detailed Reports</h3>
+        <p class="card-text">Generate professional PDF and HTML reports for stakeholders with one-click export functionality.</p>
+        <div class="card-arrow">
+            View Reports <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+    </a>
+</section>
+
+<!-- Additional Information Section -->
+<section style="max-width: 1200px; margin: 0 auto 120px; padding: 0 24px;">
+    <div style="text-align: center; margin-bottom: 64px;">
+        <h2 style="font-size: 40px; font-weight: 800; color: var(--text-primary); margin-bottom: 16px;">Industry-Leading Validation Architecture</h2>
+        <p style="font-size: 18px; color: var(--text-secondary); max-width: 700px; margin: 0 auto;">Standard DOM testing misses the rendering reality. Our integrated platform utilizes advanced computer vision pipelines to analyze semantic structures and pixel clusters just as a human operator would.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+        <div style="background: var(--bg-card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div style="width: 48px; height: 48px; background: rgba(0, 212, 255, 0.1); color: var(--cyan); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6M6 20V10M18 20V4"/></svg>
+            </div>
+            <h3 style="font-size: 20px; color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">CNN-Driven Anomaly Detection</h3>
+            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.6;">Leverage custom-trained Convolutional Neural Networks to accurately classify microscopic visual regressions, color disparities, and layout shifts that script-based testing frameworks fundamentally overlook.</p>
+        </div>
+        
+        <div style="background: var(--bg-card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div style="width: 48px; height: 48px; background: rgba(124, 58, 237, 0.1); color: #a78bfa; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            </div>
+            <h3 style="font-size: 20px; color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Localized Object Highlighting</h3>
+            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.6;">Our robust models parse UI elements directly from uploaded environments, programmatically generating precise bounding boxes and intuitive heatmaps to drastically reduce mean time to resolution (MTTR).</p>
+        </div>
+        
+        <div style="background: var(--bg-card); padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <div style="width: 48px; height: 48px; background: rgba(0, 255, 128, 0.1); color: #34d399; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 style="font-size: 20px; color: var(--text-primary); font-weight: 700; margin-bottom: 12px;">Comprehensive Evaluation Metrics</h3>
+            <p style="font-size: 15px; color: var(--text-muted); line-height: 1.6;">Track the efficacy of the verification pipeline with granular logging of precision, recall, and F1 distributions, securely recorded onto your integrated analytical dashboards on a per-epoch basis.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

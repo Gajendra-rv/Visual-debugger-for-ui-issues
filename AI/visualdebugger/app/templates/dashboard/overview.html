@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <h1 class="page-title">Platform Overview</h1>
+      <p class="page-subtitle">Summary statistics across all test sessions</p>
+    </div>
+    <a href="{{ url_for('dashboard.index') }}" class="btn-ghost">← Dashboard</a>
+  </div>
+</div>
+<div class="page-inner">
+  <div class="stats-grid" style="margin-bottom:var(--space-xl)">
+    <div class="stat-card"><div class="stat-icon stat-icon-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="stat-content"><p class="stat-label">Total Sessions</p><p class="stat-value counter" data-target="{{ stats.total_sessions }}">0</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stat-content"><p class="stat-label">Bugs Detected</p><p class="stat-value counter" data-target="{{ stats.bugs_found }}">0</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-content"><p class="stat-label">Avg Accuracy</p><p class="stat-value counter" data-target="{{ stats.avg_accuracy }}" data-suffix="%">0</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><div class="stat-content"><p class="stat-label">Active Tests</p><p class="stat-value counter" data-target="{{ stats.active_tests }}">0</p></div></div>
+  </div>
+  <div class="section-card">
+    <div class="section-card-header"><h3 class="chart-title">All Sessions</h3></div>
+    <div class="table-wrap">
+      <table class="data-table" id="overview-sessions-table">
+        <thead><tr><th>#</th><th>Session</th><th>URL</th><th>Bugs</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td class="muted">#{{ s.id }}</td>
+            <td>{{ s.session_name or 'Session #' ~ s.id }}</td>
+            <td class="url-cell"><a href="{{ s.target_url }}" target="_blank" class="url-link">{{ s.target_url[:40] }}…</a></td>
+            <td><span class="bug-count {% if s.bugs_found > 5 %}high{% elif s.bugs_found > 2 %}medium{% else %}low{% endif %}">{{ s.bugs_found }}</span></td>
+            <td><span class="status-badge status-{{ s.status }}">{{ s.status }}</span></td>
+            <td class="muted">{{ s.created_at[:10] if s.created_at else '—' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="empty-row">No sessions yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

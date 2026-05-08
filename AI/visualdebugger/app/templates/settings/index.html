@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <h1 class="page-title">Account Settings</h1>
+      <p class="page-subtitle">Manage your profile, security, and preferences</p>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <div class="settings-grid">
+    <!-- Sidebar -->
+    <div class="settings-sidebar">
+      <div class="settings-nav-item active" onclick="showTab('profile')" id="tab-profile">👤 Profile</div>
+      <div class="settings-nav-item" onclick="showTab('security')" id="tab-security">🔒 Security</div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div id="panel-profile" class="settings-card">
+      <h3>Profile Information</h3>
+      <p>Update your display name and bio shown across the platform.</p>
+      <form method="POST" action="{{ url_for('settings.index') }}" class="auth-form" id="profile-form">
+        <input type="hidden" name="action" value="profile" />
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" name="username" class="form-input form-input-lg {% if errors.username %}is-error{% endif %}"
+                 value="{{ user.username }}" id="username-input" required minlength="3" />
+          {% if errors.username %}<p class="field-error">{{ errors.username }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email <span style="color:var(--text-muted);font-size:11px">(read-only)</span></label>
+          <input type="email" class="form-input form-input-lg" value="{{ user.email }}" readonly style="opacity:0.6" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bio</label>
+          <textarea name="bio" class="textarea-input" placeholder="Tell us something about yourself…" id="bio-input">{{ user.bio or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn-primary" id="save-profile-btn">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Security Tab (hidden by default) -->
+    <div id="panel-security" class="settings-card" style="display:none">
+      <h3>Change Password</h3>
+      <p>Use a strong password with at least 8 characters including numbers and symbols.</p>
+      <form method="POST" action="{{ url_for('settings.index') }}" class="auth-form" id="security-form">
+        <input type="hidden" name="action" value="password" />
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" name="current_password" class="form-input form-input-lg {% if errors.current_password %}is-error{% endif %}" id="current-pwd-input" required />
+          {% if errors.current_password %}<p class="field-error">{{ errors.current_password }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" name="new_password" class="form-input form-input-lg {% if errors.new_password %}is-error{% endif %}" id="new-pwd-input" required minlength="8" />
+          {% if errors.new_password %}<p class="field-error">{{ errors.new_password }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" name="confirm_password" class="form-input form-input-lg {% if errors.confirm_password %}is-error{% endif %}" id="confirm-pwd-input" required />
+          {% if errors.confirm_password %}<p class="field-error">{{ errors.confirm_password }}</p>{% endif %}
+        </div>
+        <button type="submit" class="btn-primary" id="change-pwd-btn">Update Password</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+function showTab(name) {
+  ['profile','security'].forEach(t => {
+    document.getElementById('panel-' + t).style.display = t === name ? '' : 'none';
+    document.getElementById('tab-' + t).classList.toggle('active', t === name);
+  });
+}
+{% if errors.current_password or errors.new_password or errors.confirm_password %}
+showTab('security');
+{% endif %}
+</script>
+{% endblock %}

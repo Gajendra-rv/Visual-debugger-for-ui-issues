@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+
+# Virtual Environment
+venv/
+env/
+.venv/
+ENV/
+
+# Flask
+instance/
+.env
+*.log
+
+# ML
+*.h5
+*.pkl
+*.npy
+ml_experiments/data/raw/
+ml_experiments/data/processed/
+ml_experiments/data/augmented/
+
+# Media
+app/static/uploads/
+app/static/heatmaps/
+app/static/reports/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+*.egg-info/

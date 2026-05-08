@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Model Metrics{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>CNN Performance</div>
+      <h1 class="page-title">Model Metrics</h1>
+      <p class="page-subtitle">Training history, accuracy, loss, and evaluation scores</p>
+    </div>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('dashboard.index') }}" class="btn-ghost">← Dashboard</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <!-- Summary Cards -->
+  {% if metrics %}
+  {% set last = metrics[-1] %}
+  <div class="stats-grid" style="margin-bottom:var(--space-xl)">
+    <div class="stat-card"><div class="stat-icon stat-icon-green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-content"><p class="stat-label">Train Accuracy</p><p class="stat-value">{{ (last.train_acc * 100)|round(1) }}%</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="stat-content"><p class="stat-label">Val Accuracy</p><p class="stat-value">{{ (last.val_acc * 100)|round(1) }}%</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg></div><div class="stat-content"><p class="stat-label">F1 Score</p><p class="stat-value">{{ (last.f1_score * 100)|round(1) if last.f1_score else '—' }}%</p></div></div>
+    <div class="stat-card"><div class="stat-icon stat-icon-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></div><div class="stat-content"><p class="stat-label">Epochs Trained</p><p class="stat-value">{{ metrics|length }}</p></div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="metrics-charts-grid" style="margin-bottom:var(--space-xl)">
+    <div class="chart-card"><div class="chart-card-header"><div><h3 class="chart-title">Accuracy over Epochs</h3><p class="chart-subtitle">Train vs Validation</p></div><div class="chart-badge">Accuracy</div></div><div class="chart-body"><canvas id="accChart" height="280"></canvas></div></div>
+    <div class="chart-card"><div class="chart-card-header"><div><h3 class="chart-title">Loss over Epochs</h3><p class="chart-subtitle">Train vs Validation</p></div><div class="chart-badge">Loss</div></div><div class="chart-body"><canvas id="lossChart" height="280"></canvas></div></div>
+  </div>
+
+  <!-- Table -->
+  <div class="section-card">
+    <div class="section-card-header"><h3 class="chart-title">Epoch-level Metrics</h3></div>
+    <div class="table-wrap">
+      <table class="data-table" id="metrics-table">
+        <thead><tr><th>Epoch</th><th>Train Acc</th><th>Val Acc</th><th>Train Loss</th><th>Val Loss</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+        <tbody>
+          {% for m in metrics %}
+          <tr>
+            <td class="muted mono">{{ m.epoch }}</td>
+            <td class="mono">{{ (m.train_acc*100)|round(2) }}%</td>
+            <td class="mono" style="color:var(--cyan)">{{ (m.val_acc*100)|round(2) }}%</td>
+            <td class="mono" style="color:var(--red)">{{ m.train_loss|round(4) }}</td>
+            <td class="mono" style="color:var(--orange)">{{ m.val_loss|round(4) }}</td>
+            <td class="mono">{{ (m.precision*100)|round(1) if m.precision else '—' }}%</td>
+            <td class="mono">{{ (m.recall*100)|round(1) if m.recall else '—' }}%</td>
+            <td class="mono" style="color:var(--green)">{{ (m.f1_score*100)|round(1) if m.f1_score else '—' }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:var(--space-2xl)">
+    <p style="font-size:48px;margin-bottom:16px">📊</p>
+    <h3 style="font-size:20px;font-weight:700">No metrics yet</h3>
+    <p style="color:var(--text-muted);margin-top:8px">Run <code style="background:var(--bg-card);padding:2px 8px;border-radius:4px;color:var(--cyan)">python app/ml/train.py</code> to train the model.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>initModelMetricsCharts({{ metrics | tojson }});</script>
+{% endblock %}

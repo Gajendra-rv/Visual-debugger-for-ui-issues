@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Manual Upload{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>Manual Upload</div>
+      <h1 class="page-title">Upload Screenshot</h1>
+      <p class="page-subtitle">Upload an image of a UI to run it through the CNN model directly</p>
+    </div>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('analyzer.index') }}" class="btn-ghost">← Auto URL Analyzer</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for cat, msg in messages %}<div class="flash flash-{{cat}}" style="margin-bottom:12px">{{msg}}</div>{% endfor %}{% endif %}{% endwith %}
+
+  <div class="analyzer-form-card fade-in">
+    <h2>📸 Upload Local Screenshot</h2>
+    <p>Select a local `.png` or `.jpg` file. The model will analyze it without spinning up a headless browser.</p>
+    <form method="POST" action="{{ url_for('analyzer.manual') }}" id="manual-upload-form" enctype="multipart/form-data">
+      <div class="form-group">
+        <label class="form-label" for="session-name-input">Session Name (optional)</label>
+        <div class="input-wrapper">
+          <input type="text" name="session_name" id="session-name-input" class="form-input" placeholder="Manual Upload 1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Select Image File *</label>
+        <div class="url-input-row">
+          <input type="file" name="file" accept="image/png, image/jpeg" class="form-input" style="padding-top:10px" required />
+          <button type="submit" class="btn-primary" id="start-analysis-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Upload & Predict
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

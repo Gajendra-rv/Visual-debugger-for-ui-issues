@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Run Analysis{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>CNN Analyzer</div>
+      <h1 class="page-title">Visual Bug Analyzer</h1>
+      <p class="page-subtitle">Enter a URL and let the CNN model detect visual anomalies in seconds</p>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('analyzer.manual') }}" class="btn-primary" style="background:var(--grad-purple)">↑ Manual Image Upload</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for cat, msg in messages %}<div class="flash flash-{{cat}}" style="margin-bottom:12px">{{msg}}</div>{% endfor %}{% endif %}{% endwith %}
+
+  <div class="analyzer-form-card fade-in">
+    <h2>🔍 Start New Analysis</h2>
+    <p>The AI agent will capture a screenshot of the target URL, run it through the CNN pipeline, and report all detected visual bugs with heatmaps.</p>
+    <form method="POST" action="{{ url_for('analyzer.index') }}" id="analyzer-form">
+      <div class="form-group">
+        <label class="form-label" for="session-name-input">Session Name (optional)</label>
+        <div class="input-wrapper">
+          <input type="text" name="session_name" id="session-name-input" class="form-input" placeholder="My Homepage Test" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="target-url-input">Target URL *</label>
+        <div class="url-input-row">
+          <input type="url" name="target_url" id="target-url-input" class="form-input" placeholder="https://example.com" required />
+          <button type="submit" class="btn-primary" id="start-analysis-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Analyze
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="pipeline-info">
+      <p class="form-label" style="margin-bottom:12px">Analysis Pipeline</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        {% for step in ['Screenshot','Preprocess','CNN Inference','Heatmap','Report'] %}
+        <div class="pipeline-step">
+          <span class="pipeline-num">{{ loop.index }}</span>
+          <span>{{ step }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+.pipeline-info{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);}
+.pipeline-step{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-full);font-size:12px;color:var(--text-secondary);}
+.pipeline-num{width:18px;height:18px;background:var(--grad-cyan);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;}
+</style>
+{% endblock %}

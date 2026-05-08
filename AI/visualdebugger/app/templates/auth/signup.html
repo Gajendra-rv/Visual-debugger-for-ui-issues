@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block content %}
+<div class="auth-page" id="auth-signup-page">
+  <div class="auth-bg-effects">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-grid"></div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-brand">
+      <div class="auth-logo-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <h1 class="auth-brand-name">Vision<span>UI</span></h1>
+      <p class="auth-brand-tagline">AI Visual Debugging Agent</p>
+    </div>
+
+    <div class="auth-card" id="signup-card">
+      <div class="auth-card-header">
+        <h2>Create Account</h2>
+        <p>Join the AI debugging revolution</p>
+      </div>
+
+      <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form" id="signup-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Username</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="username" name="username" class="form-input {% if errors.username %}is-error{% endif %}"
+                   placeholder="johndoe" value="{{ form.username if form else '' }}" required minlength="3" />
+          </div>
+          {% if errors.username %}<p class="field-error">{{ errors.username }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="form-label">Email Address</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" id="email" name="email" class="form-input {% if errors.email %}is-error{% endif %}"
+                   placeholder="you@example.com" value="{{ form.email if form else '' }}" required />
+          </div>
+          {% if errors.email %}<p class="field-error">{{ errors.email }}</p>{% endif %}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <input type="password" id="password" name="password" class="form-input {% if errors.password %}is-error{% endif %}"
+                     placeholder="Min. 8 chars" required minlength="8" />
+              <button type="button" class="toggle-password" onclick="togglePassword('password')" id="toggle-pwd1">👁</button>
+            </div>
+            {% if errors.password %}<p class="field-error">{{ errors.password }}</p>{% endif %}
+          </div>
+
+          <div class="form-group">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <div class="input-wrapper">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <input type="password" id="confirm_password" name="confirm_password"
+                     class="form-input {% if errors.confirm_password %}is-error{% endif %}"
+                     placeholder="Repeat password" required />
+            </div>
+            {% if errors.confirm_password %}<p class="field-error">{{ errors.confirm_password }}</p>{% endif %}
+          </div>
+        </div>
+
+        <!-- Password Strength -->
+        <div class="password-strength" id="password-strength">
+          <div class="strength-bar" id="strength-bar"></div>
+        </div>
+        <p class="strength-label" id="strength-label"></p>
+
+        <button type="submit" class="btn-primary btn-full" id="signup-submit">
+          <span>Create Account</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}" id="go-login">Sign in →</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePassword(id) {
+  const input = document.getElementById(id);
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
+document.getElementById('password').addEventListener('input', function() {
+  const val = this.value;
+  const bar = document.getElementById('strength-bar');
+  const lbl = document.getElementById('strength-label');
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const levels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+  const colors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e'];
+  bar.style.width = (score * 25) + '%';
+  bar.style.background = colors[score];
+  lbl.textContent = levels[score] || '';
+  lbl.style.color = colors[score];
+});
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Test Sessions{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>Test History</div>
+      <h1 class="page-title">Test Sessions</h1>
+      <p class="page-subtitle">All analysis runs sorted by most recent</p>
+    </div>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('analyzer.index') }}" class="btn-primary" id="new-session-btn">+ New Session</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <div class="section-card">
+    <div class="table-wrap">
+      <table class="data-table" id="sessions-table">
+        <thead>
+          <tr><th>#ID</th><th>Session Name</th><th>Target URL</th><th>Bugs</th><th>Accuracy</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td class="muted">#{{ s.id }}</td>
+            <td>{{ s.session_name or 'Session #' ~ s.id }}</td>
+            <td class="url-cell"><a href="{{ s.target_url }}" target="_blank" class="url-link">{{ s.target_url[:45] }}{% if s.target_url|length > 45 %}…{% endif %}</a></td>
+            <td><span class="bug-count {% if s.bugs_found > 5 %}high{% elif s.bugs_found > 2 %}medium{% else %}low{% endif %}">{{ s.bugs_found }}</span></td>
+            <td class="mono">{{ (s.accuracy * 100)|round(1) if s.accuracy else '—' }}%</td>
+            <td><span class="status-badge status-{{ s.status }}">{{ s.status }}</span></td>
+            <td class="muted">{{ s.created_at[:10] if s.created_at else '—' }}</td>
+            <td>
+              <a href="{{ url_for('sessions.detail', session_id=s.id) }}" class="table-action-btn" id="session-{{ s.id }}">View →</a>
+              <a href="{{ url_for('reports.export_pdf', session_id=s.id) }}" class="table-action-btn" style="margin-left:4px" id="pdf-{{ s.id }}">PDF</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="empty-row">No sessions yet. <a href="{{ url_for('analyzer.index') }}">Run your first analysis →</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page" id="dashboard-page">
+
+  <!-- ── Page Title ──────────────────────────────────────────────────────── -->
+  <div class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-hero-text">
+        <div class="page-badge">
+          <span class="pulse-dot"></span>
+          Live System Active
+        </div>
+        <h1 class="page-title">AI Debugging Console</h1>
+        <p class="page-subtitle">Real-time CNN-powered visual bug detection for your web interfaces</p>
+      </div>
+      <div class="page-hero-actions">
+        <a href="{{ url_for('analyzer.index') }}" class="btn-primary" id="run-analysis-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run Analysis
+        </a>
+        <a href="{{ url_for('reports.index') }}" class="btn-ghost" id="view-reports-btn">View Reports</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stats Cards ─────────────────────────────────────────────────────── -->
+  <section class="section" id="stats-section">
+    <div class="stats-grid">
+      <a href="{{ url_for('dashboard.overview') }}" class="stat-card" id="stat-sessions">
+        <div class="stat-card-bg"></div>
+        <div class="stat-icon stat-icon-blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Sessions</p>
+          <p class="stat-value counter" data-target="{{ stats.total_sessions }}">0</p>
+          <p class="stat-change positive">↑ All time</p>
+        </div>
+        <div class="stat-arrow">→</div>
+      </a>
+
+      <a href="{{ url_for('reports.index') }}" class="stat-card" id="stat-bugs">
+        <div class="stat-card-bg"></div>
+        <div class="stat-icon stat-icon-red">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Bugs Detected</p>
+          <p class="stat-value counter" data-target="{{ stats.bugs_found }}">0</p>
+          <p class="stat-change negative">Across all sessions</p>
+        </div>
+        <div class="stat-arrow">→</div>
+      </a>
+
+      <a href="{{ url_for('dashboard.model_metrics') }}" class="stat-card" id="stat-accuracy">
+        <div class="stat-card-bg"></div>
+        <div class="stat-icon stat-icon-green">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Model Accuracy</p>
+          <p class="stat-value counter" data-target="{{ stats.avg_accuracy }}" data-suffix="%">0</p>
+          <p class="stat-change positive">↑ CNN Performance</p>
+        </div>
+        <div class="stat-arrow">→</div>
+      </a>
+
+      <a href="{{ url_for('sessions.index') }}" class="stat-card" id="stat-active">
+        <div class="stat-card-bg"></div>
+        <div class="stat-icon stat-icon-purple">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Active Tests</p>
+          <p class="stat-value counter" data-target="{{ stats.active_tests }}">0</p>
+          <p class="stat-change">Running now</p>
+        </div>
+        <div class="stat-arrow">→</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── Charts Row ──────────────────────────────────────────────────────── -->
+  <section class="section" id="charts-section">
+    <div class="charts-grid">
+      <!-- Bug Type Distribution (Doughnut) -->
+      <div class="chart-card" id="chart-bug-types">
+        <div class="chart-card-header">
+          <div>
+            <h3 class="chart-title">Bug Type Distribution</h3>
+            <p class="chart-subtitle">Detected across all sessions</p>
+          </div>
+          <div class="chart-badge">CNN Output</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="bugTypeChart" height="260"></canvas>
+        </div>
+      </div>
+
+      <!-- Timeline (Line Chart) -->
+      <div class="chart-card" id="chart-timeline">
+        <div class="chart-card-header">
+          <div>
+            <h3 class="chart-title">Bugs Over Time</h3>
+            <p class="chart-subtitle">Last 30 days</p>
+          </div>
+          <div class="chart-badge">Trend</div>
+        </div>
+        <div class="chart-body">
+          <canvas id="timelineChart" height="260"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Model Performance + Severity ───────────────────────────────────── -->
+  <section class="section" id="model-section">
+    <div class="charts-grid-3">
+      <!-- Model Metrics Card -->
+      <div class="metric-card" id="model-metric-card">
+        <div class="metric-card-header">
+          <h3 class="chart-title">Model Performance</h3>
+          <a href="{{ url_for('dashboard.model_metrics') }}" class="link-arrow" id="model-metrics-link">View All →</a>
+        </div>
+        {% if latest_metrics %}
+        <div class="metric-list">
+          <div class="metric-row">
+            <span class="metric-key">Train Accuracy</span>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar-fill" style="width:{{ (latest_metrics['train_acc']*100)|round(1) }}%"></div>
+            </div>
+            <span class="metric-val">{{ (latest_metrics['train_acc']*100)|round(1) }}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Val Accuracy</span>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar-fill blue" style="width:{{ (latest_metrics['val_acc']*100)|round(1) }}%"></div>
+            </div>
+            <span class="metric-val">{{ (latest_metrics['val_acc']*100)|round(1) }}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">Precision</span>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar-fill purple" style="width:{{ (latest_metrics['precision']*100)|round(1) if latest_metrics['precision'] else 80 }}%"></div>
+            </div>
+            <span class="metric-val">{{ (latest_metrics['precision']*100)|round(1) if latest_metrics['precision'] else '—' }}%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-key">F1 Score</span>
+            <div class="metric-bar-wrap">
+              <div class="metric-bar-fill orange" style="width:{{ (latest_metrics['f1_score']*100)|round(1) if latest_metrics['f1_score'] else 82 }}%"></div>
+            </div>
+            <span class="metric-val">{{ (latest_metrics['f1_score']*100)|round(1) if latest_metrics['f1_score'] else '—' }}%</span>
+          </div>
+        </div>
+        {% else %}
+        <p class="muted-text">No model metrics yet. Run training first.</p>
+        {% endif %}
+      </div>
+
+      <!-- Severity Donut -->
+      <div class="chart-card" id="chart-severity">
+        <div class="chart-card-header">
+          <h3 class="chart-title">Severity Split</h3>
+        </div>
+        <div class="chart-body">
+          <canvas id="severityChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions-card" id="quick-actions-card">
+        <h3 class="chart-title">Quick Actions</h3>
+        <div class="quick-actions-list">
+          <a href="{{ url_for('analyzer.index') }}" class="quick-action" id="qa-analyze">
+            <div class="qa-icon cyan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </div>
+            <div><p class="qa-title">New Analysis</p><p class="qa-sub">Scan a URL for bugs</p></div>
+            <span class="qa-arrow">›</span>
+          </a>
+          <a href="{{ url_for('sessions.index') }}" class="quick-action" id="qa-sessions">
+            <div class="qa-icon blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div><p class="qa-title">All Sessions</p><p class="qa-sub">Browse test runs</p></div>
+            <span class="qa-arrow">›</span>
+          </a>
+          <a href="{{ url_for('reports.index') }}" class="quick-action" id="qa-reports">
+            <div class="qa-icon purple">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7"/></svg>
+            </div>
+            <div><p class="qa-title">Bug Reports</p><p class="qa-sub">View all findings</p></div>
+            <span class="qa-arrow">›</span>
+          </a>
+          <a href="{{ url_for('dashboard.model_metrics') }}" class="quick-action" id="qa-model">
+            <div class="qa-icon green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div><p class="qa-title">Model Metrics</p><p class="qa-sub">CNN performance</p></div>
+            <span class="qa-arrow">›</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Recent Sessions Table ───────────────────────────────────────────── -->
+  <section class="section" id="recent-sessions-section">
+    <div class="section-card">
+      <div class="section-card-header">
+        <div>
+          <h3 class="chart-title">Recent Test Sessions</h3>
+          <p class="chart-subtitle">Latest analysis runs</p>
+        </div>
+        <a href="{{ url_for('sessions.index') }}" class="btn-ghost-sm" id="all-sessions-link">View All</a>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="sessions-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Session</th>
+              <th>Target URL</th>
+              <th>Bugs Found</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in recent_sessions %}
+            <tr>
+              <td class="muted">{{ s.id }}</td>
+              <td>{{ s.session_name or 'Session #' ~ s.id }}</td>
+              <td class="url-cell">
+                <a href="{{ s.target_url }}" target="_blank" rel="noopener" class="url-link">{{ s.target_url[:40] }}{% if s.target_url|length > 40 %}…{% endif %}</a>
+              </td>
+              <td>
+                <span class="bug-count {% if s.bugs_found > 5 %}high{% elif s.bugs_found > 2 %}medium{% else %}low{% endif %}">
+                  {{ s.bugs_found }}
+                </span>
+              </td>
+              <td><span class="status-badge status-{{ s.status }}">{{ s.status }}</span></td>
+              <td class="muted">{{ s.created_at[:10] if s.created_at else '—' }}</td>
+              <td>
+                <a href="{{ url_for('sessions.detail', session_id=s.id) }}" class="table-action-btn" id="session-link-{{ s.id }}">View →</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="empty-row">No sessions yet. <a href="{{ url_for('analyzer.index') }}">Run your first analysis →</a></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Bug Alert Feed ──────────────────────────────────────────────────── -->
+  <section class="section" id="alert-feed-section">
+    <div class="section-card">
+      <div class="section-card-header">
+        <h3 class="chart-title">
+          <span class="pulse-dot red"></span> Recent Bug Alerts
+        </h3>
+        <a href="{{ url_for('reports.index') }}" class="btn-ghost-sm" id="all-reports-link">All Reports</a>
+      </div>
+      <div class="alert-feed" id="alert-feed">
+        {% set bug_types = ['layout','color','overlap','missing','alignment','contrast'] %}
+        {% set severities = ['critical','high','medium','low'] %}
+        {% for s in recent_sessions %}
+          {% if s.bugs_found > 0 %}
+          <div class="alert-item" id="alert-{{ s.id }}">
+            <div class="alert-severity sev-{{ ['high','medium','critical','low'][loop.index0 % 4] }}"></div>
+            <div class="alert-content">
+              <p class="alert-title">{{ ['Layout Issue','Color Contrast','Element Overlap','Missing Element'][loop.index0 % 4] }} detected</p>
+              <p class="alert-meta">{{ s.target_url[:50] }} · {{ s.created_at[:10] if s.created_at else '' }}</p>
+            </div>
+            <a href="{{ url_for('sessions.detail', session_id=s.id) }}" class="alert-link">›</a>
+          </div>
+          {% endif %}
+        {% else %}
+        <p class="muted-text padded">No alerts yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+// Chart data injected from Flask
+const bugTypeData = {{ type_distribution | tojson }};
+const timeSeriesData = {{ time_series | tojson }};
+const severityData = {{ severity_distribution | tojson }};
+initDashboard(bugTypeData, timeSeriesData, severityData);
+</script>
+{% endblock %}

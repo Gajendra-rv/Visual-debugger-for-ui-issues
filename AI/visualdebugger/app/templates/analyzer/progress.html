@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Analyzing…{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-inner" style="max-width:600px">
+  <div class="progress-card fade-in" id="progress-card">
+    <div class="progress-icon">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <p class="progress-percent" id="progress-percent">0%</p>
+    <p style="color:var(--text-muted);font-size:13px;margin-bottom:8px">Session #{{ test_session.id }}</p>
+    <h2 style="font-size:20px;margin-bottom:4px">CNN Analysis Running</h2>
+    <p class="progress-step" id="progress-step">Initializing…</p>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progress-bar" style="width:0%"></div>
+    </div>
+    <p style="color:var(--text-muted);font-size:12px;margin-top:16px">Analyzing: <strong style="color:var(--cyan)">{{ test_session.target_url }}</strong></p>
+  </div>
+</div>
+<script>
+const SESSION_ID = {{ test_session.id }};
+const pollInterval = setInterval(async () => {
+  try {
+    const res = await fetch(`/analyzer/api/progress/${SESSION_ID}`);
+    const data = await res.json();
+    document.getElementById('progress-percent').textContent = data.percent + '%';
+    document.getElementById('progress-step').textContent = data.step || '…';
+    document.getElementById('progress-bar').style.width = data.percent + '%';
+    if (data.status === 'completed' && data.redirect) {
+      clearInterval(pollInterval);
+      setTimeout(() => { window.location.href = data.redirect; }, 600);
+    } else if (data.status === 'failed') {
+      clearInterval(pollInterval);
+      document.getElementById('progress-step').textContent = 'Analysis failed: ' + data.step;
+      document.querySelector('.progress-icon').style.background = 'rgba(239,68,68,0.15)';
+    }
+  } catch(e) { console.error(e); }
+}, 800);
+</script>
+{% endblock %}

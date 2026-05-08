@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Analysis Result{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>Analysis Complete</div>
+      <h1 class="page-title">Bug Detection Results</h1>
+      <p class="page-subtitle">{{ test_session.target_url }}</p>
+    </div>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('reports.export_pdf', session_id=test_session.id) }}" class="btn-primary" id="export-pdf-btn">
+        ↓ Export PDF
+      </a>
+      <a href="{{ url_for('analyzer.index') }}" class="btn-ghost">New Analysis</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <!-- Summary Row -->
+  <div class="section-card" style="margin-bottom:var(--space-lg)">
+    <div class="result-summary">
+      <div class="result-stat"><div class="result-stat-val">{{ bugs|length }}</div><div class="result-stat-label">Bugs Found</div></div>
+      <div class="result-stat"><div class="result-stat-val" style="color:var(--green)">{{ (test_session.accuracy * 100)|round(1) if test_session.accuracy else '—' }}%</div><div class="result-stat-label">Model Confidence</div></div>
+      <div class="result-stat"><div class="result-stat-val" style="color:var(--orange)">{{ bugs|selectattr('severity','eq','critical')|list|length }}</div><div class="result-stat-label">Critical</div></div>
+      <div class="result-stat"><div class="result-stat-val" style="color:var(--red)">{{ bugs|selectattr('severity','eq','high')|list|length }}</div><div class="result-stat-label">High</div></div>
+      <div class="result-stat" style="margin-left:auto"><span class="status-badge status-{{ test_session.status }}">{{ test_session.status }}</span></div>
+    </div>
+  </div>
+
+  <!-- Bug Cards -->
+  {% if bugs %}
+    {% for bug in bugs %}
+    <div class="bug-card {{ bug.severity }}" id="bug-{{ bug.id }}">
+      <div class="bug-card-header">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="bug-type-tag">{{ bug.bug_type }}</span>
+          <span class="status-badge status-{{ 'failed' if bug.severity == 'critical' else ('pending' if bug.severity == 'high' else 'completed') }}">{{ bug.severity }}</span>
+        </div>
+        <span class="confidence-badge" style="color:var(--cyan)">{{ (bug.confidence * 100)|round(1) }}%</span>
+      </div>
+      <p style="color:var(--text-secondary);font-size:13.5px;margin-bottom:10px">{{ bug.description or 'Visual anomaly detected by CNN model.' }}</p>
+      {% if bug.heatmap_path %}
+      <details style="margin-top:8px">
+        <summary style="cursor:pointer;color:var(--cyan);font-size:13px;font-weight:600">View Heatmap ›</summary>
+        <div class="heatmap-viewer" style="margin-top:10px">
+          <img src="{{ url_for('static', filename=bug.heatmap_path) }}" alt="Bug heatmap" class="heatmap-img" onerror="this.style.display='none'" />
+        </div>
+      </details>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="section-card" style="text-align:center;padding:var(--space-2xl)">
+    <p style="font-size:48px;margin-bottom:16px">✅</p>
+    <h3 style="font-size:20px;font-weight:700;margin-bottom:8px">No Bugs Detected</h3>
+    <p style="color:var(--text-muted)">The CNN model found no visual anomalies in this UI screenshot.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

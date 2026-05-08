@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<!-- Hero -->
+<div class="about-hero-section">
+  <div class="page-badge" style="display:inline-flex;margin-bottom:16px"><span class="pulse-dot"></span>AI-Powered QA</div>
+  <h1>VisionUI <span>AI Visual Debugging</span><br/>Agent for Web UI Testing</h1>
+  <p>An intelligent, automated system that uses Convolutional Neural Networks and computer vision to detect, classify, and report visual bugs in modern web interfaces — faster and more accurately than manual QA.</p>
+</div>
+
+<!-- Features -->
+<div class="page-inner">
+  <div style="text-align:center;margin:var(--space-2xl) 0 var(--space-xl)">
+    <h2 style="font-size:26px;font-weight:800">How It Works</h2>
+    <p style="color:var(--text-muted);margin-top:8px">The full AI pipeline from URL to structured bug report</p>
+  </div>
+  <div class="features-grid">
+    {% set features = [
+      ('📸','Screenshot Capture','Selenium WebDriver captures full-page screenshots in headless Chrome — including lazy-loaded content and dynamic elements.','feature-icon' + ' bg-blue'),
+      ('🔬','CNN Inference','A fine-tuned MobileNetV2 model analyzes each image region and classifies it into 6 bug categories with confidence scores.','feature-icon bg-cyan'),
+      ('🌡️','GradCAM Heatmaps','Gradient-weighted Class Activation Maps highlight the exact pixel regions responsible for each detected anomaly.','feature-icon bg-purple'),
+      ('📊','Smart Reporting','All results are stored in SQLite with metadata, and can be exported as PDF reports with annotated screenshots.','feature-icon bg-green'),
+      ('🔄','Real-Time Progress','Background analysis threads stream progress updates to the frontend in real time — no page refresh needed.','feature-icon bg-orange'),
+      ('🧠','Transfer Learning','The CNN uses ImageNet pre-trained weights (MobileNetV2) plus a custom head — achieving >90% accuracy with minimal training data.','feature-icon bg-red'),
+    ] %}
+    {% for icon, title, desc, cls in features %}
+    <div class="feature-card fade-in">
+      <div class="{{ cls }}" style="background:var(--cyan-glow);font-size:28px;width:52px;height:52px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px">{{ icon }}</div>
+      <h3>{{ title }}</h3>
+      <p>{{ desc }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Bug Types -->
+  <div style="margin:var(--space-2xl) 0">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:var(--space-md)">Detectable Bug Categories</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+      {% for btype, desc, color in [
+        ('Layout','Mispositioned elements outside their containers','var(--red)'),
+        ('Color Contrast','WCAG accessibility failures in text/background','var(--orange)'),
+        ('Overlap','UI components unexpectedly overlapping','var(--purple)'),
+        ('Missing Element','Expected UI element absent from viewport','var(--red)'),
+        ('Alignment','Elements misaligned with grid baselines','var(--blue)'),
+        ('Contrast','Insufficient visual distinction between elements','var(--cyan)'),
+      ] %}
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-md)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:{{ color }};box-shadow:0 0 6px {{ color }};"></div>
+          <span style="font-weight:700;font-size:14px">{{ btype }}</span>
+        </div>
+        <p style="font-size:12.5px;color:var(--text-muted)">{{ desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Tech Stack -->
+  <div style="margin:var(--space-2xl) 0">
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:var(--space-md)">Tech Stack</h2>
+    <div class="tech-stack-grid">
+      {% for name, role, emoji in [
+        ('TensorFlow','Deep Learning Framework','🧠'),
+        ('MobileNetV2','CNN Backbone (Transfer Learning)','🔬'),
+        ('Keras','Model API & Training','⚙️'),
+        ('Flask','Python Web Backend','🐍'),
+        ('SQLite','Lightweight Database','🗄️'),
+        ('Selenium','Browser Automation','🌐'),
+        ('OpenCV','Image Processing','📷'),
+        ('ReportLab','PDF Generation','📄'),
+        ('Chart.js','Data Visualization','📊'),
+        ('Pillow','Synthetic Dataset Gen','🖼️'),
+        ('scikit-learn','Evaluation Metrics','📈'),
+        ('Werkzeug','Auth & Security','🔒'),
+      ] %}
+      <div class="tech-item">
+        <div style="font-size:24px;margin-bottom:6px">{{ emoji }}</div>
+        <div class="tech-item-name">{{ name }}</div>
+        <div class="tech-item-role">{{ role }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:var(--space-2xl) 0">
+    <a href="{{ url_for('analyzer.index') }}" class="btn-primary" id="try-it-btn" style="font-size:15px;padding:14px 32px">
+      🚀 Try the Analyzer
+    </a>
+    <a href="{{ url_for('pages.comments') }}" class="btn-ghost" id="contact-us-btn" style="margin-left:12px;font-size:15px;padding:13px 28px">Comments</a>
+  </div>
+</div>
+{% endblock %}

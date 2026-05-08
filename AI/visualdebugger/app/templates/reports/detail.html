@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Bug Report #{{ report.id }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot red"></span>Report Detail</div>
+      <h1 class="page-title">Bug Report #{{ report.id }}</h1>
+      <p class="page-subtitle">{{ report.bug_type.capitalize() }} — {{ report.severity.upper() }}</p>
+    </div>
+    <div class="page-hero-actions">
+      <a href="{{ url_for('reports.index') }}" class="btn-ghost">← All Reports</a>
+    </div>
+  </div>
+</div>
+<div class="page-inner" style="max-width:900px">
+  <div class="section-card" style="margin-bottom:var(--space-lg)">
+    <div style="padding:var(--space-xl)">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:var(--space-lg)">
+        <span class="bug-type-tag">{{ report.bug_type }}</span>
+        <span class="status-badge status-{{ 'failed' if report.severity=='critical' else ('pending' if report.severity=='high' else 'completed') }}">{{ report.severity }}</span>
+        {% if report.is_false_positive %}<span class="status-badge status-pending">False Positive</span>{% endif %}
+        <span class="confidence-badge" style="margin-left:auto;color:var(--cyan)">{{ (report.confidence*100)|round(1) }}% Confidence</span>
+      </div>
+      <p style="color:var(--text-secondary);font-size:15px;line-height:1.8;margin-bottom:var(--space-lg)">{{ report.description or 'Visual anomaly detected by CNN model.' }}</p>
+
+      {% if report.bounding_box %}
+      <div style="background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-md);margin-bottom:var(--space-lg)">
+        <p class="mono" style="font-size:12px;color:var(--text-muted)">Bounding Box: {{ report.bounding_box }}</p>
+      </div>
+      {% endif %}
+
+      {% if report.heatmap_path %}
+      <div>
+        <p class="form-label" style="margin-bottom:10px">GradCAM Heatmap</p>
+        <div class="heatmap-viewer">
+          <img src="{{ url_for('static', filename=report.heatmap_path if report.heatmap_path else 'uploads/demo.png') }}" alt="Bug heatmap" class="heatmap-img" onerror="this.parentElement.innerHTML='<p style=padding:20px;color:var(--text-muted)>Heatmap not available</p>'" />
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not report.is_false_positive %}
+      <form method="POST" action="{{ url_for('reports.mark_false_positive', report_id=report.id) }}" style="margin-top:var(--space-lg)">
+        <button type="submit" class="btn-ghost" id="false-positive-btn" onclick="return confirm('Mark this as a false positive?')">
+          Mark as False Positive
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

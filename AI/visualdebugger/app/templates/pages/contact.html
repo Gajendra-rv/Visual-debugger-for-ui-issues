@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Community Comments{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot"></span>Community Feedback</div>
+      <h1 class="page-title">Community Comments</h1>
+      <p class="page-subtitle">Share your thoughts on the CNN Visual Debugger, suggest features, or just say hello to other developers.</p>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <div class="contact-page-grid" style="grid-template-columns: 1fr 1.5fr;">
+    <!-- Form Side -->
+    <div class="contact-card" style="align-self: start;">
+      <h3>Post a Comment</h3>
+      {% with msgs = get_flashed_messages(with_categories=true) %}{% if msgs %}{% for cat, msg in msgs %}<div class="flash flash-{{cat}}" style="margin-bottom:16px">{{msg}}</div>{% endfor %}{% endif %}{% endwith %}
+      <form method="POST" action="{{ url_for('pages.contact') }}" class="auth-form" id="contact-form">
+        <div class="form-group">
+          <label class="form-label">Your Name *</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" name="name" class="form-input" placeholder="Jane Doe" required id="contact-name" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address * (Private)</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" name="email" class="form-input" placeholder="you@example.com" required id="contact-email" />
+          </div>
+        </div>
+        <div class="form-group" style="display:none;">
+          <input type="hidden" name="subject" value="Community Comment" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message *</label>
+          <textarea name="message" class="textarea-input" rows="4" placeholder="Tell us what's on your mind…" required id="contact-message" style="min-height:100px"></textarea>
+        </div>
+        <button type="submit" class="btn-primary btn-full" id="contact-submit">
+          <span>Post Comment</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <!-- Feed Side -->
+    <div class="comments-feed" style="display: flex; flex-direction: column; gap: 16px;">
+      <h2 style="font-size:24px; color:var(--text-primary); margin-bottom:8px;">Recent Comments</h2>
+      {% if comments %}
+        {% for comment in comments %}
+        <div class="comment-card" style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px; transition: transform 0.2s ease;">
+          <div class="comment-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-weight:600; color:var(--cyan); display:flex; align-items:center; gap:12px;">
+              <div style="width:40px; height:40px; border-radius:50%; background:var(--grad-cyan); color:#000; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px;">
+                {{ comment.name[0]|upper }}
+              </div>
+              <span style="font-size:16px;">{{ comment.name }}</span>
+            </div>
+            <div style="font-size:13px; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;">
+              {{ comment.created_at[:16] }}
+            </div>
+          </div>
+          <div class="comment-body" style="font-size:15px; color:var(--text-secondary); line-height:1.6;">
+            {{ comment.message }}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div style="color:var(--text-muted); font-size:15px; padding:40px; text-align:center; border:2px dashed var(--border); border-radius:var(--radius-lg);">
+          <div style="font-size:32px; margin-bottom:12px;">💬</div>
+          No comments yet. Be the first to start the conversation!
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Bug Reports{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-text">
+      <div class="page-badge"><span class="pulse-dot red"></span>Bug Repository</div>
+      <h1 class="page-title">Bug Reports</h1>
+      <p class="page-subtitle">All CNN-detected visual anomalies across sessions</p>
+    </div>
+  </div>
+</div>
+<div class="page-inner">
+  <!-- Filters -->
+  <form method="GET" action="{{ url_for('reports.index') }}" class="filter-bar" id="filter-form">
+    <span class="filter-label">Filter:</span>
+    <select name="type" class="filter-select" onchange="this.form.submit()" id="filter-type">
+      <option value="">All Types</option>
+      {% for t in ['layout','color','overlap','missing','alignment','contrast'] %}
+      <option value="{{ t }}" {% if filter_type == t %}selected{% endif %}>{{ t.capitalize() }}</option>
+      {% endfor %}
+    </select>
+    <select name="severity" class="filter-select" onchange="this.form.submit()" id="filter-severity">
+      <option value="">All Severities</option>
+      {% for s in ['critical','high','medium','low'] %}
+      <option value="{{ s }}" {% if filter_severity == s %}selected{% endif %}>{{ s.capitalize() }}</option>
+      {% endfor %}
+    </select>
+    {% if filter_type or filter_severity %}
+    <a href="{{ url_for('reports.index') }}" class="btn-ghost-sm" id="clear-filters">Clear Filters</a>
+    {% endif %}
+    <span style="margin-left:auto;color:var(--text-muted);font-size:12px">{{ reports|length }} results</span>
+  </form>
+
+  <div class="section-card">
+    <div class="table-wrap">
+      <table class="data-table" id="reports-table">
+        <thead>
+          <tr><th>#</th><th>Type</th><th>Severity</th><th>Confidence</th><th>Session</th><th>URL</th><th>Date</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          {% for r in reports %}
+          <tr>
+            <td class="muted">{{ r.id }}</td>
+            <td><span class="bug-type-tag">{{ r.bug_type }}</span></td>
+            <td><span class="status-badge status-{{ 'failed' if r.severity=='critical' else ('pending' if r.severity=='high' else 'completed') }}">{{ r.severity }}</span></td>
+            <td class="mono">{{ (r.confidence*100)|round(1) }}%</td>
+            <td><a href="{{ url_for('sessions.detail', session_id=r.session_id) }}" class="url-link">#{{ r.session_id }}</a></td>
+            <td class="url-cell"><a href="{{ r.target_url }}" target="_blank" class="url-link">{{ r.target_url[:35] }}…</a></td>
+            <td class="muted">{{ r.created_at[:10] if r.created_at else '—' }}</td>
+            <td><a href="{{ url_for('reports.detail', report_id=r.id) }}" class="table-action-btn" id="report-{{ r.id }}">View →</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="empty-row">No reports match the current filters.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
